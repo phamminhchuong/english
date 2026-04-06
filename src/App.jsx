@@ -49,6 +49,26 @@ export default function App() {
     handlePause,
   } = useAudioPlayer(lessons);
 
+  // Keyboard shortcuts: Space = play/pause, ArrowLeft = rewind 15s, ArrowRight = fast forward 15s
+  useEffect(() => {
+    function handleKeyDown(e) {
+      const tag = e.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        rewind(15);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        fastForward(15);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [togglePlay, rewind, fastForward]);
+
   return (
     <div className={`app-layout${sidebarOpen ? "" : " sidebar-closed"}`}>
       <audio
