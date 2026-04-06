@@ -2,7 +2,14 @@ import { useState, useRef, useEffect, useCallback } from "react";
 
 export function useAudioPlayer(lessons) {
   const audioRef = useRef(null);
-  const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+  const [currentLessonIndex, setCurrentLessonIndex] = useState(() => {
+    const saved = localStorage.getItem("podcast_lesson_index");
+    if (saved !== null) {
+      const idx = parseInt(saved, 10);
+      if (!isNaN(idx) && idx >= 0 && idx < lessons.length) return idx;
+    }
+    return 0;
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
@@ -14,6 +21,11 @@ export function useAudioPlayer(lessons) {
   const [activeLineId, setActiveLineId] = useState(null);
 
   const currentLesson = lessons[currentLessonIndex];
+
+  // Persist current lesson index across sessions
+  useEffect(() => {
+    localStorage.setItem("podcast_lesson_index", currentLessonIndex);
+  }, [currentLessonIndex]);
 
   // Sync audio element properties
   useEffect(() => {
