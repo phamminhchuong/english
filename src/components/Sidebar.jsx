@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { levels } from "../data/lessons";
 
 const LEVEL_PALETTE = [
@@ -21,6 +21,7 @@ export default function Sidebar({
 }) {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const activeLessonRef = useRef(null);
 
   const filtered = lessons.filter((l) => {
     const matchLevel = filter === "All" || l.level === filter;
@@ -29,6 +30,11 @@ export default function Sidebar({
       l.level.toLowerCase().includes(search.toLowerCase());
     return matchLevel && matchSearch;
   });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    activeLessonRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" });
+  }, [currentLessonIndex, isOpen, filtered.length]);
 
   return (
     <aside className={`sidebar${isOpen ? " open" : " hidden"}`}>
@@ -87,6 +93,7 @@ export default function Sidebar({
                 className={`lesson-item${isActive ? " active" : ""}`}
                 onClick={() => onSelect(realIdx)}
                 aria-current={isActive ? "true" : undefined}
+                ref={isActive ? activeLessonRef : null}
               >
                 <div className="lesson-item-top">
                   <span className="lesson-number">{String(lesson.id).padStart(3, "0")}</span>

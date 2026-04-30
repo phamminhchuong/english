@@ -12,8 +12,22 @@ export function useAudioPlayer(lessons) {
   });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [playbackRate, setPlaybackRate] = useState(1);
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem("podcast_volume");
+    if (saved !== null) {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed)) return Math.max(0, Math.min(parsed, 1));
+    }
+    return 0.8;
+  });
+  const [playbackRate, setPlaybackRate] = useState(() => {
+    const saved = localStorage.getItem("podcast_playback_rate");
+    if (saved !== null) {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return 1;
+  });
   const [repeatMode, setRepeatMode] = useState("off"); // 'off' | 'one' | 'all'
   const [autoNext, setAutoNext] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -26,6 +40,14 @@ export function useAudioPlayer(lessons) {
   useEffect(() => {
     localStorage.setItem("podcast_lesson_index", currentLessonIndex);
   }, [currentLessonIndex]);
+
+  useEffect(() => {
+    localStorage.setItem("podcast_volume", String(volume));
+  }, [volume]);
+
+  useEffect(() => {
+    localStorage.setItem("podcast_playback_rate", String(playbackRate));
+  }, [playbackRate]);
 
   // Sync audio element properties
   useEffect(() => {
